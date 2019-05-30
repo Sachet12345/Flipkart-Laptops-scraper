@@ -1,0 +1,184 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>flipkart_laptops &#8212; Flipkart Laptops Scraper 1.0 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for flipkart_laptops</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="kn">import</span> <span class="nn">scrapy</span>
+<span class="kn">from</span> <span class="nn">scrapy.crawler</span> <span class="k">import</span> <span class="n">CrawlerProcess</span>
+<span class="kn">from</span> <span class="nn">scrapy.exceptions</span> <span class="k">import</span> <span class="n">CloseSpider</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+
+<div class="viewcode-block" id="add_to_pickle"><a class="viewcode-back" href="../code.html#flipkart_laptops.add_to_pickle">[docs]</a><span class="k">def</span> <span class="nf">add_to_pickle</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;To add to Pickle file.&#39;&#39;&#39;</span>
+	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+		<span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">HIGHEST_PROTOCOL</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_from_pickle"><a class="viewcode-back" href="../code.html#flipkart_laptops.read_from_pickle">[docs]</a><span class="k">def</span> <span class="nf">read_from_pickle</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;To read from the Pickle file&#39;&#39;&#39;</span>
+	<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+				<span class="k">yield</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">EOFError</span><span class="p">:</span>
+			<span class="k">pass</span></div>
+
+<div class="viewcode-block" id="FlipkartLaptopsSpider"><a class="viewcode-back" href="../code.html#flipkart_laptops.FlipkartLaptopsSpider">[docs]</a><span class="k">class</span> <span class="nc">FlipkartLaptopsSpider</span><span class="p">(</span><span class="n">scrapy</span><span class="o">.</span><span class="n">Spider</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;The spider class with scrapy.Spider subclass.&#39;&#39;&#39;</span>
+	<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;flipkart_laptops&#39;</span>
+	<span class="n">allowed_domains</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;flipkart.com&#39;</span><span class="p">]</span>
+	<span class="n">start_urls</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;https://www.flipkart.com/search?q=laptops&amp;otracker=search&amp;otracker1=search&amp;marketplace=FLIPKART&amp;as-show=on&amp;as=off&#39;</span><span class="p">]</span>
+	<span class="c1">#start_urls = [&#39;https://www.flipkart.com/search?q=laptops&amp;otracker=search&amp;otracker1=search&amp;marketplace=FLIPKART&amp;as-show=on&amp;as=off&amp;page=2&#39;]</span>
+	<span class="c1">#count=0</span>
+
+
+
+<div class="viewcode-block" id="FlipkartLaptopsSpider.parse"><a class="viewcode-back" href="../code.html#flipkart_laptops.FlipkartLaptopsSpider.parse">[docs]</a>	<span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">response</span><span class="p">):</span>
+		<span class="sd">&#39;&#39;&#39;The parse method is in charge of processing the response and returning scraped data and/or more URLs to follow.&#39;&#39;&#39;</span>
+
+		<span class="c1">#print (response.url)</span>
+		<span class="n">product_name</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;._3wU53n::text&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+		<span class="n">product_price</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;._1vC4OE._2rQ-NK::text&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+		<span class="n">product_rating</span><span class="o">=</span><span class="n">response</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="s1">&#39;.hGSR34::text&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+		<span class="c1">#print(product_price)</span>
+		<span class="n">pkl_file</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+		<span class="n">row_data</span><span class="o">=</span><span class="nb">zip</span><span class="p">(</span><span class="n">product_name</span><span class="p">,</span><span class="n">product_price</span><span class="p">,</span><span class="n">product_rating</span><span class="p">)</span>        
+
+		<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">row_data</span><span class="p">:</span>
+			<span class="n">scraped_info</span><span class="o">=</span><span class="p">{</span>
+			<span class="s1">&#39;product-name&#39;</span> <span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+			<span class="s1">&#39;product_price&#39;</span> <span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+			<span class="s1">&#39;product-rating&#39;</span> <span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+			<span class="p">}</span>
+			<span class="c1">#print(&quot;q&quot;)</span>
+			<span class="sd">&#39;&#39;&#39;with open(pkl_file, &#39;wb&#39;) as handle:</span>
+<span class="sd">				pickle.dump(scraped_info, handle, protocol=pickle.HIGHEST_PROTOCOL)&#39;&#39;&#39;</span>
+			<span class="n">add_to_pickle</span><span class="p">(</span><span class="n">pkl_file</span><span class="p">,</span><span class="n">scraped_info</span><span class="p">)</span>
+			<span class="k">yield</span> <span class="n">scraped_info</span>
+			
+			<span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crawler</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">get_stats</span><span class="p">()</span>
+			<span class="n">count</span><span class="o">=</span><span class="n">stats</span><span class="p">[</span><span class="s1">&#39;item_scraped_count&#39;</span><span class="p">]</span>
+			<span class="c1">#print(count)</span>
+			<span class="c1">#print(sys.argv[1])</span>
+
+			<span class="k">if</span> <span class="n">count</span><span class="o">&gt;=</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+				<span class="k">raise</span> <span class="n">CloseSpider</span><span class="p">(</span><span class="s1">&#39;Limit reached&#39;</span><span class="p">)</span>
+			
+			<span class="c1">#yield scraped_info</span>
+			<span class="n">next_page_selector</span><span class="o">=</span><span class="s1">&#39;._3fVaIS::attr(href)&#39;</span>
+			<span class="n">next_page</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">css</span><span class="p">(</span><span class="n">next_page_selector</span><span class="p">)</span><span class="o">.</span><span class="n">extract</span><span class="p">()</span>
+			<span class="n">next_page</span><span class="o">=</span><span class="n">next_page</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+			<span class="c1">#print(next_page)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">urljoin</span><span class="p">(</span><span class="n">next_page</span><span class="p">))</span>
+			<span class="k">if</span> <span class="n">next_page</span> <span class="p">:</span>
+				<span class="k">yield</span> <span class="n">scrapy</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">urljoin</span><span class="p">(</span><span class="n">next_page</span><span class="p">),</span><span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">)</span></div></div>
+
+
+<span class="n">process</span><span class="o">=</span> <span class="n">CrawlerProcess</span><span class="p">()</span>
+<span class="n">process</span><span class="o">.</span><span class="n">crawl</span><span class="p">(</span><span class="n">FlipkartLaptopsSpider</span><span class="p">)</span>
+<span class="n">process</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="c1">#for item in read_from_pickle(&#39;flipkart.dat&#39;):</span>
+		<span class="c1">#print(repr(item))</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">Flipkart Laptops Scraper</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../code.html">Classes and methods</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Sachet Sourav.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

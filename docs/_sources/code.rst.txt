@@ -1,0 +1,5 @@
+Classes and methods
+===================
+
+.. automodule:: flipkart_laptops
+        :members:
